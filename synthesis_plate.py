@@ -11,10 +11,11 @@ from utils import *
 from aug import augmention
 
 available_number = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-available_char = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+available_char = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z']
 available_all = available_number + available_char
 # available_template = ['NN-CN/NNNN', 'NN-CN/NNN.NN', 'NNC/NNN.NN', 'NNC/NNNN', 'NNC-NNNN', 'NNC-NNN.NN']
-available_template = ['**-**/****', '**-**/***.**', '***/***.**', '***/****', '***-****', '***-***.**']
+available_template = ['**-**/****', '**-**/***.**', '***/***.**', '***/****', '***-****', '***-***.**', '****/***.**']
+
 available_square_bg = glob.glob('background/square*.jpg')
 available_rec_bg = glob.glob('background/rec*.jpg')
 
@@ -31,7 +32,7 @@ for i in range(len(data)):
 
 assert os.path.exists('classes.txt') == True, 'Not exists file classes.txt, try again !'
 
-def generate_boundingbox(sample, template, background, textsize, size = (480, 400), margin = 10):
+def generate_boundingbox(sample, template, background, textsize, size, margin = 10):
 	if '/' in template:
 		return generate_2lines_boundingbox(sample, template, background, textsize)
 	else:
@@ -74,15 +75,15 @@ def segment_and_get_boxes(img, sample, textsize, margin = 3):
     thresh[:int(height*0.05), :] = 0
     thresh[int(height*0.95):, :] = 0
     # cv2.imshow('thresh', thresh)
-    _, contours, hier = cv2.findContours(thresh.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contours, hier = cv2.findContours(thresh.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     sorted_contours = sorted(contours, key = cv2.contourArea, reverse = True)
     list_box = []
     for i in range(len(sorted_contours)):
         x, y, w, h = cv2.boundingRect(sorted_contours[i])
-        x += random.randint(-margin, 0)
-        y += random.randint(-margin, 0)
-        w += random.randint(0, 2*margin)
-        h += random.randint(0, 2*margin)
+        # x += random.randint(-margin, 0)
+        # y += random.randint(-margin, 0)
+        # w += random.randint(0, 2*margin)
+        # h += random.randint(0, 2*margin)
         list_box.append([x, y, (x+w), (y+h)])
     list_box = nms_fast(np.array(list_box), overlapThresh = 0.1)[: total_char]
     list_box = format_boundingbox(np.array(list_box), width, height)
@@ -142,7 +143,7 @@ if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser(description='Vietnamese Synthesis License Plate.')
 
-	parser.add_argument('--numb', default=1,
+	parser.add_argument('--numb', default=100,
 	                   help='Total number of Synthesis images')
 
 	parser.add_argument('--output_dir', default='output',
@@ -154,12 +155,12 @@ if __name__ == '__main__':
 	err = 0
 	for i in progressbar.progressbar(range(int(args.numb))):
 		try:
-			filename = os.path.join(args.output_dir ,'syn_{}.jpg'.format(i))
+			filename = os.path.join(args.output_dir ,'gen_{}.jpg'.format(i))
 			idx = random.randint(0, total_template - 1)
 			template = available_template[idx]
 			sample = generate_sample(template)
 			base_img, textsize = generate_plate(sample)
-			# aug_img = augmention(base_img)
+			# base_img = augmention(base_img)
 			width, height = base_img.size
 			boxes = segment_and_get_boxes(np.array(base_img), sample, textsize)
 			labels = sample.replace('-', '').replace('.', '').replace('/', '')

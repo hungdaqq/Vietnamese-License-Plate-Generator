@@ -1,16 +1,23 @@
 from PIL import Image, ImageFont, ImageDraw
 import numpy as np 
+import random
 
 def generate_1lines_image(template, bg = 'background/bg1.jpg'):
-	font = ImageFont.truetype("MyFont-Regular_ver3.otf", 108)
+	
+	random_value = random.random() # random number in range [0.0,1.0)
+	if random_value < 0.5:
+		font = ImageFont.truetype("MyFont-Regular_ver3.otf", 126)
+	else:
+		font = ImageFont.truetype("UKNUMBER2.ttf", 120)
+
 	if type(bg).__name__ == 'str':
 		im = Image.open(bg)
 	else:
 		im = bg
-	if len(template.replace('-', '').replace('.', '')) > 7:
-		im = im.resize((450, 110))
-	else:
-		im = im.resize((400, 110))
+	# if len(template.replace('-', '').replace('.', '')) > 7:
+	im = im.resize((640, 150))
+	# else:
+	# 	im = im.resize((640, 120))
 	width, height = im.size
 	draw = ImageDraw.Draw(im)
 	textsize = font.getsize(template)
@@ -20,8 +27,15 @@ def generate_1lines_image(template, bg = 'background/bg1.jpg'):
 	draw.text((textX, textY), template, font=font, fill=fill)
 	return im, textsize
 
-def generate_2lines_images(template, bg = 'background/bg2.jpg', margin = 10, size = (480, 400)):
-	font = ImageFont.truetype("MyFont-Regular_ver3.otf", 180)
+def generate_2lines_images(template, bg = 'background/bg2.jpg', margin = 10, size = (640, 500)):
+	random_value = random.random() # random number in range [0.0,1.0)
+	if random_value < 0.5:
+		font = ImageFont.truetype("MyFont-Regular_ver3.otf", 196)
+		size = (640,500)
+	else:
+		font = ImageFont.truetype("UKNUMBER2.ttf", 180)
+		size = (640,400)
+	random_value = random.random()
 	if type(bg).__name__ == 'str':
 		im = Image.open(bg)
 	else:
